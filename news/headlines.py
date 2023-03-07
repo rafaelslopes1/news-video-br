@@ -2,6 +2,7 @@ import feedparser
 
 class Headlines:
     def __init__(self, country, language, num_news):
+        print("[Headlines] Initiaization...")
         self.__headlines_rss = 'https://news.google.com/news/rss'
         self.country = country
         self.language = language
@@ -15,6 +16,7 @@ class Headlines:
         return feed
 
     def get_headlines(self):
+        print(f"[Headlines] Requesting {self.num_news} headlines...")
         feed = self.__get_rss_dict()
         headlines = feed.entries[0:self.num_news]
         return headlines
