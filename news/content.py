@@ -5,6 +5,7 @@ import requests
 from text.gpt import Gpt
 import nltk
 from typing import List
+from text.watson import Watson
 
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
 config = Config()
@@ -16,6 +17,7 @@ nltk.download('punkt')
 
 class NewsContent:
     def __init__(self, news_data):
+        print("[NewsContent] Initialization NewsContent...")
         self.url = self.__get_expanded_url(news_data.link)
         self.__article = self.__get_article()
 
@@ -113,11 +115,14 @@ class NewsContent:
     def __split_sentences(self) -> List[str]:
         sentences = nltk.sent_tokenize(self.source_content_generated)
         structured_sentences = []
+        
+        watson = Watson()
 
         for sentence in sentences:
+            keywords = watson.get_keywords(sentence)
             structured_sentences.append({
                 'text': sentence,
-                'keywords': [],
+                'keywords': keywords,
                 'images': []
             })
             
