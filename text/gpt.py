@@ -1,9 +1,10 @@
 import openai
 import os
+from typing import List
 
 
 class Gpt():
-    def __init__(self, bot_description: str) -> None:
+    def __init__(self, bot_description: str, last_messages: List[dict]=[]) -> None:
         if bot_description is None:
             raise AttributeError("system_config must be provided")
 
@@ -15,6 +16,9 @@ class Gpt():
         }
 
         self.__history = [system_config]
+        
+        if last_messages is not None:
+            self.__history += last_messages
 
     def completion(self, message: str, temperature: float = 1) -> str:
         if message is None:
@@ -47,5 +51,5 @@ class Gpt():
             "role": "assistant",
             "content": message
         }
-        
+
         self.__history.append(new_message)
