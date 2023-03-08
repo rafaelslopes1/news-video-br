@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+text/watson_apikey.json
+test.py
+watson_nlu_credentials.json
+data/content.json
