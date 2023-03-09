@@ -7,6 +7,7 @@ import nltk
 from typing import List
 from text.watson import Watson
 from data.database import Database
+from image.image import SearchEngine
 import json
 
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
@@ -61,17 +62,18 @@ class NewsContent:
         expanded_url = response.url
         return expanded_url
 
-    def __get_images_urls(self):
-        return self.__article.images
-
     def generate(self):
         without_blank_lines = self.__remove_blank_lines(
             self.source_content_original)
 
-        have_content = "source_content_generated" in self.__stored_content and self.__stored_content["source_content_generated"] != ""
-        have_title = "source_title_generated" in self.__stored_content and self.__stored_content["source_title_generated"] != ""
-        have_summary = "source_summary_generated" in self.__stored_content and self.__stored_content["source_summary_generated"] != ""
-        have_keywords = "source_keywords_generated" in self.__stored_content and self.__stored_content["source_keywords_generated"] != ""
+        have_content = "source_content_generated" in self.__stored_content and self.__stored_content[
+            "source_content_generated"] != ""
+        have_title = "source_title_generated" in self.__stored_content and self.__stored_content[
+            "source_title_generated"] != ""
+        have_summary = "source_summary_generated" in self.__stored_content and self.__stored_content[
+            "source_summary_generated"] != ""
+        have_keywords = "source_keywords_generated" in self.__stored_content and self.__stored_content[
+            "source_keywords_generated"] != ""
 
         if not (have_content and have_title and have_summary and have_keywords):
             chat = self.__generate_chat()
@@ -81,7 +83,14 @@ class NewsContent:
             self.__generate_summary(chat)
             self.__generate_keywords(chat)
 
+        else:
+            self.source_content_generated = self.__stored_content["source_content_generated"]
+            self.source_title_generated = self.__stored_content["source_title_generated"]
+            self.source_summary_generated = self.__stored_content["source_summary_generated"]
+            self.source_keywords_generated = self.__stored_content["source_keywords_generated"]
+
         self.__split_sentences()
+        self.__search_images()
 
     def __remove_blank_lines(self, content):
         all_lines = content.split('\n')
@@ -164,10 +173,32 @@ class NewsContent:
             structured_sentences.append({
                 'text': sentence,
                 'keywords': keywords,
-                'images': []
+                'images': [],
+                'query': ''
             })
 
         self.sentences = structured_sentences
+
+        self.__database.save(self)
+
+        return self.sentences
+
+    def __search_images(self):
+        main_keyword = self.source_keywords_generated[0]
+
+        for sentence in self.sentences:
+            google = SearchEngine()
+
+            for i in range(len(sentence["keywords"])):
+                secondary_keyword = sentence["keywords"][i]
+                if main_keyword != secondary_keyword:
+                    break
+
+            query = f"{main_keyword} {secondary_keyword}"
+            images_url = google.search_images(query)
+
+            sentence["images"] = images_url
+            sentence["query"] = query
 
         self.__database.save(self)
 
