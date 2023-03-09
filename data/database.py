@@ -1,15 +1,20 @@
 import json
-
+import os
 
 class Database:
     def __init__(self) -> None:
         print("[Database] Initialization...")
         self.__content_file_path = './data/content.json'
 
+        if not os.path.isfile(self.__content_file_path):
+            with open(self.__content_file_path, 'w') as f:
+                json.dump({}, f)
+
     def save(self, content):
         print(f"[Database] Saving content on {self.__content_file_path}...")
         with open(self.__content_file_path, 'w') as file:
-            content_string = json.dumps(content, ensure_ascii=False, default=self.__todict, indent=2)
+            content_string = json.dumps(
+                content, ensure_ascii=False, default=self.__todict, indent=2)
             file.write(content_string)
 
     def load(self):
@@ -17,7 +22,6 @@ class Database:
             file_buffer = file.read()
             content_json = json.loads(file_buffer)
             return content_json
-
 
     def __todict(self, obj, classkey=None):
         if isinstance(obj, dict):
@@ -30,9 +34,9 @@ class Database:
         elif hasattr(obj, "__iter__") and not isinstance(obj, str):
             return [self.__todict(v, classkey) for v in obj]
         elif hasattr(obj, "__dict__"):
-            data = dict([(key, self.__todict(value, classkey)) 
-                for key, value in obj.__dict__.items() 
-                if not callable(value) and not key.startswith('_')])
+            data = dict([(key, self.__todict(value, classkey))
+                         for key, value in obj.__dict__.items()
+                         if not callable(value) and not key.startswith('_')])
             if classkey is not None and hasattr(obj, "__class__"):
                 data[classkey] = obj.__class__.__name__
             return data
