@@ -7,7 +7,7 @@ import nltk
 from typing import List
 from text.watson import Watson
 from data.database import Database
-from image.image import SearchEngine
+from image.search_engine import SearchEngine
 import json
 
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
@@ -75,7 +75,7 @@ class NewsContent:
         have_keywords = "source_keywords_generated" in self.__stored_content and self.__stored_content[
             "source_keywords_generated"] != ""
 
-        if not (have_content and have_title and have_summary and have_keywords):
+        if not (have_content and have_title and have_summary and have_keywords) or not self.__is_the_same:
             chat = self.__generate_chat()
 
             self.__generate_article(chat, without_blank_lines)
